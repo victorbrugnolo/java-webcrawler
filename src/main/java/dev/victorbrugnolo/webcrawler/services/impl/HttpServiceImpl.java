@@ -19,10 +19,10 @@ public class HttpServiceImpl implements HttpService {
 
   @Override
   public String getUrlContent(final URI uri) {
-    try (BufferedReader bufferedReader = new BufferedReader(
+    try (var bufferedReader = new BufferedReader(
         new InputStreamReader(uri.toURL().openStream()))) {
       String pageContent;
-      StringBuilder stringBuilder = new StringBuilder();
+      var stringBuilder = new StringBuilder();
 
       while ((pageContent = bufferedReader.readLine()) != null) {
         stringBuilder.append(pageContent);

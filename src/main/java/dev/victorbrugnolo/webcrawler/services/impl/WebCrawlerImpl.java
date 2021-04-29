@@ -16,18 +16,14 @@ import java.util.regex.Pattern;
 
 public class WebCrawlerImpl implements WebCrawler {
 
-  private HttpService httpService;
-  private Environment environment;
-
-  private WebCrawlerImpl() {
-  }
+  private final HttpService httpService;
+  private final Environment environment;
 
   private String rootPage;
 
   public WebCrawlerImpl(final HttpService httpService, final Environment environment) {
     this.httpService = httpService;
     this.environment = environment;
-    this.rootPage = environment.getValue("BASE_URL");
   }
 
   @Override
@@ -36,7 +32,8 @@ public class WebCrawlerImpl implements WebCrawler {
     Set<String> found = new HashSet<>();
     Set<String> marked = new HashSet<>();
 
-    String keyword = environment.getValue("KEYWORD");
+    String keyword = this.environment.getValue("KEYWORD");
+    this.rootPage = this.environment.getValue("BASE_URL");
 
     if (!isValidKeyword(keyword)) {
       throw new IllegalArgumentException("[ERROR] Invalid keyword");
@@ -86,7 +83,7 @@ public class WebCrawlerImpl implements WebCrawler {
 
   private int getMaxResults() {
     try {
-      return Integer.parseInt(environment.getValue("MAX_RESULTS"));
+      return Integer.parseInt(this.environment.getValue("MAX_RESULTS"));
     } catch (Exception ex) {
       return -1;
     }

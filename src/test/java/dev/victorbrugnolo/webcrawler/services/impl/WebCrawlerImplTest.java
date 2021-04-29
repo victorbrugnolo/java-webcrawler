@@ -1,9 +1,13 @@
 package dev.victorbrugnolo.webcrawler.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import dev.victorbrugnolo.webcrawler.configuration.Environment;
+import dev.victorbrugnolo.webcrawler.services.HttpService;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -23,11 +27,13 @@ class WebCrawlerImplTest {
   @Mock
   private Environment environment;
 
+  @Mock
+  private HttpService httpService;
+
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
-
 
   @ParameterizedTest
   @MethodSource("keywords")
@@ -49,9 +55,21 @@ class WebCrawlerImplTest {
   }
 
   @Test
-  void mustGetIllegalArgumentExceptionWhenKeywordIsEmpty() {
-    when(environment.getValue("KEYWORD")).thenReturn("");
-    assertThrows(IllegalArgumentException.class, () -> webCrawler.crawl());
+  void mustCrawlWhenBaseUrlIsInvalid() {
+    when(environment.getValue("BASE_URL")).thenReturn("https://");
+    when(environment.getValue("KEYWORD")).thenReturn("keyword");
+    assertDoesNotThrow(() -> webCrawler.crawl());
+  }
+
+  @Test
+  void mustCrawlSuccess() {
+    String httpContent =
+        "<http>KEYWORD<a href=\"/images\"></a><a href=\"https://google.com/search\"></a></http>";
+    when(environment.getValue("BASE_URL")).thenReturn("https://google.com");
+    when(environment.getValue("KEYWORD")).thenReturn("keyword");
+    when(environment.getValue("MAX_RESULTS")).thenReturn("5");
+    when(httpService.getUrlContent(any(URI.class))).thenReturn(httpContent);
+    assertDoesNotThrow(() -> webCrawler.crawl());
   }
 
   static Stream<String> keywords() {
